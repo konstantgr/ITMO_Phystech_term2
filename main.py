@@ -63,7 +63,7 @@ GLOBAL_TIME = 0
 
 
 def model(duration, mu, alpha):  # modeling
-    global GLOBAL_TIME, PLOT_DATA, ACCURACY, M,
+    global GLOBAL_TIME, PLOT_DATA, ACCURACY, M
 
     def f(t, arg):  # equation system
         r, v_r, phi, v_phi, alpha, v_alpha = arg
