@@ -7,12 +7,25 @@ import scipy.integrate as scp
 
 R_EARTH = 6375000
 R_MOON = 1738000
-G_EARTH = 9.81
-G_MOON = 1.62
-OMEGA_MAX = 1  # для ЛК - 5
+g_EARTH = 9.81
+g_MOON = 1.62
+GM_EARTH = R_EARTH ** 2 * 9.81
+GM_MOON = R_MOON ** 2 * 1.62
+OMEGA_MAX = 2 * np.pi / 360  # для ЛК - в пять раз больше
 
 x_list = np.arange(0, 20, 0.1)
 y_list = np.arange(0, 20, 0.1)
+
+
+# класс РН
+class RN(object):
+    def __init__(self, mass, dry_mass, thrust, gas_speed, d, drag):
+        self.mass = mass
+        self.dry_mass = dry_mass
+        self.thrust = thrust
+        self.gas_speed = gas_speed
+        self.d = d
+        self.drag = drag
 
 
 # сроздаем класс слайдеров
@@ -33,6 +46,7 @@ class Sliders(object):
         self.mu.on_changed(slider1)
 
 
+# функция отображения
 def slider1(event):
     ax.clear()
     ax.grid()
@@ -61,19 +75,34 @@ PLOT_DATA = np.empty((0, 9))  # пустой массив для всеееее�
 ACCURACY = 1
 GLOBAL_TIME = 0
 
+RN1 = RN(2145000, 135000, 34350, 2580, )
 
-def model(duration, mu, alpha):  # modeling
-    global GLOBAL_TIME, PLOT_DATA, ACCURACY, M
+
+def rho(x):  # модель атмосферы
+    if x > 100000:
+        return 0
+    else:
+        return abs(-5.077428495107001e-98 * x ** 20 + 1.02179450092716e-91 * x ** 19 - 9.51056273723164e-86 * x ** 18 \
+                   + 5.43086712256032e-80 * x ** 17 + -2.12795123856615e-74 * x ** 16 + 6.06179497780304e-69 * x ** 15 \
+                   - 1.297628679472637e-63 * x ** 14 + 2.12767111018346e-58 * x ** 13 - 2.698622303025403e-53 * x ** 12 \
+                   + 2.654936679029503e-48 * x ** 11 - 2.018662492657540e-43 * x ** 10 + 1.174063071822955e-38 * x ** 9 \
+                   - 5.127635720995367e-34 * x ** 8 + 1.632085561589600e-29 * x ** 7 - 3.606575463093424e-25 * x ** 6 \
+                   + 5.081926585007299e-21 * x ** 5 - 3.752168715313960e-17 * x ** 4 - 7.009582584511156e-15 * x ** 3 \
+                   + 4.948170131598756e-09 * x ** 2 - 1.197533162371212e-04 * x + 1.226219387339549)
+
+
+def model(duration, mu, omega):  # modeling
 
     def f(t, arg):  # equation system
-        r, v_r, phi, v_phi, alpha, v_alpha = arg
+        r, v_r, phi, v_phi, mass, mu, alpha = arg
         return [
-            - mu,
-            U / M * mu * np.cos(alpha) - MG_moon / (r ** 2) + V_c ** 2 * r,
+            v_r,
+            -GM_EARTH / (r ** 2),
             U / M * mu * np.sin(alpha) / r,
             0,
-            V_r,
-            V_c
+            mu,
+            0,
+            omega
         ]
 
     arg0 = [M, V_r, V_c, alpha, r, c]  # start f() args
