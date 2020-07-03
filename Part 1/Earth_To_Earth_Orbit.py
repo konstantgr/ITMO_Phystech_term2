@@ -106,7 +106,7 @@ def model(duration, mu, omega, stage):  # modeling
         mass = w[-1, 4]
         alpha = w[-1, 6]
         if mass < INITIAL_MASS - stage.mass + stage.dry_mass:
-            print("first end")
+            print("fuel end")
         print(x, '\t', v_x, '\t', y, '\t', v_y, '\t', mass, '\t', mu, '\t', alpha, '\t', omega * OMEGA_MAX,
               np.sqrt(v_x ** 2 + v_y ** 2))
 
