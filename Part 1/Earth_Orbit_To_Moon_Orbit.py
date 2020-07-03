@@ -18,7 +18,7 @@ GM_MOON = R_MOON ** 2 * 1.62
 R_EARTH_MOON = 384405000
 OMEGA_MOON = np.sqrt(GM_EARTH / (R_EARTH_MOON ** 3))
 
-DEBUG = True
+DEBUG = False
 
 
 # класс РН
@@ -200,7 +200,7 @@ ax.grid()
 fig.subplots_adjust(left=0.07, right=0.95, top=0.95, bottom=0.5)
 
 # Создание слайдеров
-s1 = Sliders(0, 0, 70000, 0, 0, 0)  # number_y, number_x, max_time, init_time, init_omega, init_mu
+s1 = Sliders(0, 0, 0, 0, 0, 0)  # number_y, number_x, max_time, init_time, init_omega, init_mu
 s2 = Sliders(1, 0, 400, 0, 0, 1)
 s3 = Sliders(2, 0, 40, 36, 1, 0)
 s4 = Sliders(3, 0, 5000, 0, 0, 0)
