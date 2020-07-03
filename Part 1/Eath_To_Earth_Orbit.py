@@ -174,7 +174,10 @@ def Solver(event):
 
     model(s5.duration.val, s5.mu.val, s5.omega.val, RN3)
     model(s6.duration.val, s6.mu.val, s6.omega.val, RN3)
-
+    model(s7.duration.val, s7.mu.val, s7.omega.val, RN3)
+    model(s8.duration.val, s8.mu.val, s8.omega.val, RN3)
+    model(10000, 0, 0, RN3)
+    
     ax.clear()
     ax.grid()
 
@@ -192,14 +195,14 @@ ax.grid()
 fig.subplots_adjust(left=0.07, right=0.95, top=0.95, bottom=0.5)
 
 # Создание слайдеров
-s1 = Sliders(0, 0, 300, 150.9, 0, 1)  # number_y, number_x, max_time, init_time, init_omega, init_mu
-s2 = Sliders(1, 0, 400, 0, 0, 1)
-s3 = Sliders(2, 0, 400, 338.7, 0, 1)
-s4 = Sliders(3, 0, 300, 0, 0, 0)
-s5 = Sliders(0, 1, 300, 0, 0, 0)
-s6 = Sliders(1, 1, 5000, 0, 0, 0)
-s7 = Sliders(2, 1, 300, 0, 0, 0)
-s8 = Sliders(3, 1, 300, 0, 0, 0)
+s1 = Sliders(0, 0, 300, 79.6, 0.50, 1)  # number_y, number_x, max_time, init_time, init_omega, init_mu
+s2 = Sliders(1, 0, 300, 70.8, 0.23, 1)
+s3 = Sliders(2, 0, 500, 108.9, -0.01, 1)
+s4 = Sliders(3, 0, 500, 224.4, 0.20, 1)
+s5 = Sliders(0, 1, 1000, 193.4, 0.10, 1)
+s6 = Sliders(1, 1, 5000, 4517.6, 0, 0)
+s7 = Sliders(2, 1, 180, 180, 1, 0)
+s8 = Sliders(3, 1, 300, 188.7, 0.07, 0)
 
 plt.show()
 
