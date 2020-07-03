@@ -137,7 +137,6 @@ AS.dry_mass = 2315
 AS.thrust = 15600  # можно управлять!!!!!!!!!!!
 AS.gas_speed = 3050
 
-
 PLOT_DATA = np.empty((0, 9))  # пустой массив для всееееех данных
 
 
@@ -176,8 +175,7 @@ def Solver(event):
     model(s6.duration.val, s6.mu.val, s6.omega.val, RN3)
     model(s7.duration.val, s7.mu.val, s7.omega.val, RN3)
     model(s8.duration.val, s8.mu.val, s8.omega.val, RN3)
-    model(10000, 0, 0, RN3)
-    
+
     ax.clear()
     ax.grid()
 
@@ -200,12 +198,12 @@ s2 = Sliders(1, 0, 300, 70.8, 0.23, 1)
 s3 = Sliders(2, 0, 500, 108.9, -0.01, 1)
 s4 = Sliders(3, 0, 500, 224.4, 0.20, 1)
 s5 = Sliders(0, 1, 1000, 193.4, 0.10, 1)
-s6 = Sliders(1, 1, 5000, 4517.6, 0, 0)
-s7 = Sliders(2, 1, 180, 180, 1, 0)
-s8 = Sliders(3, 1, 300, 188.7, 0.07, 0)
+s6 = Sliders(1, 1, 5000, 3650, 0, 0)
+s7 = Sliders(2, 1, 180, 0, 0, 0)
+s8 = Sliders(3, 1, 300, 0, 0, 0)
 
 plt.show()
 
 np.savetxt('Earth_To_Earth_Orbit', PLOT_DATA, delimiter=',')
-#x 	 v_x 	 y 	 v_y 	 mass 	 mu 	 alpha 	 omega * OMEGA_MAX      time
+# x 	 v_x 	 y 	 v_y 	 mass 	 mu 	 alpha 	 omega * OMEGA_MAX      time
 
