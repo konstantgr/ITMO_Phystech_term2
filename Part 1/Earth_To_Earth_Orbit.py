@@ -1,3 +1,4 @@
+# %matplotlib notebook
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -137,6 +138,9 @@ AS.thrust = 15600  # можно управлять!!!!!!!!!!!
 AS.gas_speed = 3050
 
 
+PLOT_DATA = np.empty((0, 9))  # пустой массив для всееееех данных
+
+
 # функция отображения
 def Solver(event):
     global PLOT_DATA, GLOBAL_TIME, ACCURACY, INITIAL_MASS, x, y, v_y, alpha, v_x, mass
@@ -193,11 +197,12 @@ s2 = Sliders(1, 0, 400, 0, 0, 1)
 s3 = Sliders(2, 0, 400, 338.7, 0, 1)
 s4 = Sliders(3, 0, 300, 0, 0, 0)
 s5 = Sliders(0, 1, 300, 0, 0, 0)
-s6 = Sliders(1, 1, 300, 0, 0, 0)
+s6 = Sliders(1, 1, 5000, 0, 0, 0)
 s7 = Sliders(2, 1, 300, 0, 0, 0)
 s8 = Sliders(3, 1, 300, 0, 0, 0)
 
 plt.show()
 
-np.savetxt('Earth_To_Earth_Orbit.csv', PLOT_DATA, delimiter=',')
+np.savetxt('Earth_To_Earth_Orbit', PLOT_DATA, delimiter=',')
 #x 	 v_x 	 y 	 v_y 	 mass 	 mu 	 alpha 	 omega * OMEGA_MAX      time
+
