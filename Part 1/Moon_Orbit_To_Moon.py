@@ -68,16 +68,12 @@ def model(duration, mu, omega, stage):  # modeling
     if duration != 0:
         def f(t, arg):  # equation system
             x, v_x, y, v_y, mass, mu, alpha, omega = arg
-            x_moon, y_moon = moon_pos(t)
-            oR = np.sqrt(x ** 2 + y ** 2)  # расстояние от центра земли
-            mR = np.sqrt((x - x_moon) ** 2 + (y - y_moon) ** 2)  # расстояние от центра луны
+            oR = np.sqrt(x ** 2 + y ** 2)  # расстояние от центра луны
             return [
                 v_x,
-                - GM_EARTH / oR ** 3 * x - GM_MOON / mR ** 3 * (x - x_moon) \
-                + stage.thrust * np.cos(alpha) * mu / mass,
+                - GM_MOON / oR ** 3 * x + stage.thrust * np.cos(alpha) * mu / mass,
                 v_y,
-                - GM_EARTH / oR ** 3 * y - GM_MOON / mR ** 3 * (y - y_moon) \
-                + stage.thrust * np.sin(alpha) * mu / mass,
+                - GM_MOON / oR ** 3 * y + stage.thrust * np.sin(alpha) * mu / mass,
                 - stage.thrust / stage.gas_speed * mu,
                 0,
                 omega,
@@ -93,7 +89,7 @@ def model(duration, mu, omega, stage):  # modeling
         for i in np.linspace(0, duration, int(ACCURACY * duration)):
             w = np.vstack((w, (np.hstack((ODE.integrate(i), i + GLOBAL_TIME)))))  # склеиваю новое решение со вмеренем
 
-        GLOBAL_TIME = GLOBAL_TIME + duration
+        GLOBAL_TIME = GLOBAL_TIME + i
         PLOT_DATA = np.vstack((PLOT_DATA, w))  # склеиваю старые значения полета с новыми
         x = w[-1, 0]  # data update
         v_x = w[-1, 1]
@@ -138,59 +134,51 @@ PLOT_DATA = np.empty((0, 9))  # пустой массив для всеееее�
 
 # функция отображения
 def Solver(event):
-    global PLOT_DATA, GLOBAL_TIME, ACCURACY, INITIAL_MASS, OMEGA_MAX, x, y, v_y, alpha, v_x, mass, omega
+    global PLOT_DATA, GLOBAL_TIME, ACCURACY, INITIAL_MASS, OMEGA_MAX, x, y, v_y, alpha, v_x, mass
 
     PLOT_DATA = np.empty((0, 9))  # пустой массив для всееееех данных
     ACCURACY = 0.005
-    OMEGA_MAX = np.pi / 180  # для ЛК - в пять раз больше!!!!
-    INITIAL_MASS = (RN3.mass + CM.mass + SM.mass + DS.mass + AS.mass)
-
+    INITIAL_MASS = RN3.mass + CM.mass + SM.mass + DS.mass + AS.mass
+    OMEGA_MAX = 5 * np.pi / 180  # для ЛК - в пять раз больше!!!!
     if DEBUG:
-        x = -2000000
-        v_x = 12000
-        y = -R_EARTH - 185000
-        v_y = -4550
-        mass = INITIAL_MASS
-        alpha = 0
+        x = 3.730067102118466496e+08
+        v_x = 7.071716774924381752e+03
+        y = 5.484614687433502823e+07
+        v_y = 1.250968647500175621e+03
+        mass = 4.300000000000000000e+04
+        alpha = 3.141592653589807327e+00
         omega = 0
-        GLOBAL_TIME = 0
+        GLOBAL_TIME = 5.056724999999998545e+04
     else:
-        x, v_x, y, v_y, mass, mu, alpha, omega, GLOBAL_TIME = np.genfromtxt('Earth_To_Earth_Orbit', delimiter=',')[-1]
+        x, v_x, y, v_y, mass, mu, alpha, omega, GLOBAL_TIME = np.genfromtxt('Earth_Orbit_To_Moon_Orbit', delimiter=',')[-1]
+        # перевод координат
+    x -= moon_pos(GLOBAL_TIME)[0]
+    y -= moon_pos(GLOBAL_TIME)[1]
+    v_x -= OMEGA_MOON * moon_pos(GLOBAL_TIME)[1]
+    v_y -= OMEGA_MOON * moon_pos(GLOBAL_TIME)[0]
+
 
     print('x', '\t', 'v_x', '\t', 'y', '\t', 'v_y', '\t', 'mass', '\t', 'mu', '\t', 'alpha', '\t', 'omega * OMEGA_MAX',
-          'np.sqrt(v_x ** 2 + v_y ** 2)', s3.omega.val)
+          'np.sqrt(v_x ** 2 + v_y ** 2)')
 
+    model(s1.duration.val, s1.mu.val, s1.omega.val, SM)
+    model(s2.duration.val, s2.mu.val, s2.omega.val, SM)
 
-    model(s1.duration.val, s1.mu.val, s1.omega.val, RN3)
-    model(s2.duration.val, s2.mu.val, s2.omega.val, RN3)
+    #INITIAL_MASS -= RN3.mass
+    #mass = INITIAL_MASS
 
-    INITIAL_MASS -= RN3.mass
-    mass = INITIAL_MASS
-    OMEGA_MAX *= 5
-    ACCURACY = 10
-
-    model(s3.duration.val, s3.mu.val, s3.omega.val, SM)
-
-    ACCURACY = 0.005
-    model(s4.duration.val, s4.mu.val, s4.omega.val, SM)
-    model(s5.duration.val, s5.mu.val, s5.omega.val, SM)
-    model(s6.duration.val, s6.mu.val, s6.omega.val, SM)
+    #model(s3.duration.val, s3.mu.val, s3.omega.val, SM)
+    #model(s4.duration.val, s4.mu.val, s4.omega.val, SM)
+    #model(s5.duration.val, s5.mu.val, s5.omega.val, SM)
+    #model(s6.duration.val, s6.mu.val, s6.omega.val, SM)
 
     ax.clear()
     ax.grid()
 
     ax.plot(PLOT_DATA[:, 0], PLOT_DATA[:, 2])
     angle = np.linspace(0, 2 * np.pi, 1000)
-    ax.plot((185000 + R_EARTH) * np.sin(angle), (185000 + R_EARTH) * np.cos(angle))
-    ax.plot(R_EARTH * np.sin(angle), R_EARTH * np.cos(angle))
-
-    mtime = PLOT_DATA[:, 8]
-    ax.plot(moon_pos(mtime)[0], moon_pos(mtime)[1])
-
-    ax.plot(R_MOON * np.sin(angle) + moon_pos(mtime)[0][-1], R_MOON * np.cos(angle) + moon_pos(mtime)[1][-1])
-    ax.plot((R_MOON + 50000) * np.sin(angle) + moon_pos(mtime)[0][-1],
-            (R_MOON + 50000) * np.cos(angle) + moon_pos(mtime)[1][-1])
-
+    ax.plot(R_MOON * np.sin(angle), R_MOON * np.cos(angle))
+    ax.plot((50000 + R_MOON) * np.sin(angle), (50000 + R_MOON) * np.cos(angle))
 
 # Создадим окно с графиком
 fig, ax = plt.subplots()
@@ -202,14 +190,14 @@ fig.subplots_adjust(left=0.07, right=0.95, top=0.95, bottom=0.5)
 # Создание слайдеров
 s1 = Sliders(0, 0, 70000, 0, 0, 0)  # number_y, number_x, max_time, init_time, init_omega, init_mu
 s2 = Sliders(1, 0, 400, 0, 0, 1)
-s3 = Sliders(2, 0, 40, 36, 1, 0)
-s4 = Sliders(3, 0, 5000, 0, 0, 0)
-s5 = Sliders(0, 1, 1000, 0, 0, 0)
+s3 = Sliders(2, 0, 400, 0, 0, 1)
+s4 = Sliders(3, 0, 300, 0, 0, 0)
+s5 = Sliders(0, 1, 300, 0, 0, 0)
 s6 = Sliders(1, 1, 5000, 0, 0, 0)
 s7 = Sliders(2, 1, 300, 0, 0, 0)
 s8 = Sliders(3, 1, 300, 0, 0, 0)
 
 plt.show()
 
-np.savetxt('Earth_Orbit_To_Moon_Orbit', PLOT_DATA, delimiter=',')
+np.savetxt('Moon_Orbit_To_Moon', PLOT_DATA, delimiter=',')
 # x 	 v_x 	 y 	 v_y 	 mass 	 mu 	 alpha 	 omega * OMEGA_MAX      time
