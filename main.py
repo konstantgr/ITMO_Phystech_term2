@@ -5,16 +5,16 @@ import matplotlib.widgets as wdg
 import time
 import scipy.integrate as scp
 
+x_list = np.arange(0, 20, 0.1)
+y_list = np.arange(0, 20, 0.1)
+
 R_EARTH = 6375000
 R_MOON = 1738000
 g_EARTH = 9.81
 g_MOON = 1.62
 GM_EARTH = R_EARTH ** 2 * 9.81
 GM_MOON = R_MOON ** 2 * 1.62
-OMEGA_MAX = 2 * np.pi / 360  # для ЛК - в пять раз больше
-
-x_list = np.arange(0, 20, 0.1)
-y_list = np.arange(0, 20, 0.1)
+OMEGA_MAX = 2 * np.pi / 360  # для ЛК - в пять раз больше!!!!
 
 
 # класс РН
@@ -28,57 +28,29 @@ class RN(object):
         self.drag = drag
 
 
+class Empty:
+    pass
+
+
 # сроздаем класс слайдеров
 class Sliders(object):
-    def __init__(self, number_y, number_x, max_time):  # три раза одно и то же: создаем axes слайдера, задаем сам
+    def __init__(self, number_y, number_x, max_time, init_time, init_omega, init_mu):  # три раза одно и то же: создаем axes слайдера, задаем сам
         # слайдер с его min, max, и начальным значением, а так же указываем функцию, которую вызываем при изменении
-        self.axes_duration = plt.axes([0.03 + number_x * 0.49, 0.42 - number_y * 0.1, 0.4, 0.02])
-        self.duration = wdg.Slider(self.axes_duration, valmin=0.1, valmax=max_time, label='t', valinit=10,
-                                   valfmt='%1.1f')
-        self.duration.on_changed(slider1)
+        self.axes_duration = plt.axes([0.03 + number_x * 0.49, 0.42 - number_y * 0.1, 0.4, 0.02])  # положение
+        self.duration = wdg.Slider(self.axes_duration, valmin=0, valmax=max_time, label='t', valinit=init_time,
+                                   valfmt='%1.1f')  # мин, макс, лейбл, начальное значение
+        self.duration.on_changed(Solver)  # вызов функции при обновлении обновления
 
         self.axes_omega = plt.axes([0.03 + number_x * 0.49, 0.39 - number_y * 0.1, 0.4, 0.02])
-        self.omega = wdg.Slider(self.axes_omega, valmin=0, valmax=OMEGA_MAX, label='ω', valinit=0, valfmt='%1.2f')
-        self.omega.on_changed(slider1)
+        self.omega = wdg.Slider(self.axes_omega, valmin=-OMEGA_MAX, valmax=OMEGA_MAX, label='ω', valinit=init_omega, valfmt='%1.2f')
+        self.omega.on_changed(Solver)
 
         self.axes_mu = plt.axes([0.03 + number_x * 0.49, 0.36 - number_y * 0.1, 0.4, 0.02])
-        self.mu = wdg.Slider(self.axes_mu, valmin=0, valmax=1, label='μ', valinit=0, valfmt='%1.0f')
-        self.mu.on_changed(slider1)
+        self.mu = wdg.Slider(self.axes_mu, valmin=0, valmax=1, label='μ', valinit=init_mu, valfmt='%1.0f')
+        self.mu.on_changed(Solver)
 
 
-# функция отображения
-def slider1(event):
-    ax.clear()
-    ax.grid()
-    ax.plot(x_list, a.duration.val * y_list)
-
-
-# Создадим окно с графиком
-fig, ax = plt.subplots()
-ax.plot(x_list, y_list)
-ax.grid()
-fig.subplots_adjust(left=0.07, right=0.95, top=0.95, bottom=0.5)
-
-# Создание слайдеров
-a = Sliders(0, 0, 300)
-b = Sliders(1, 0, 300)
-c = Sliders(2, 0, 300)
-d = Sliders(3, 0, 300)
-e = Sliders(0, 1, 300)
-f = Sliders(1, 1, 300)
-g = Sliders(2, 1, 300)
-h = Sliders(3, 1, 300)
-
-plt.show()
-
-PLOT_DATA = np.empty((0, 9))  # пустой массив для всееееех данных
-ACCURACY = 1
-GLOBAL_TIME = 0
-
-RN1 = RN(2145000, 135000, 34350, 2580, )
-
-
-def rho(x):  # модель атмосферы
+def rho(x):  # модель атмосферы, максимальное отклонение от табличных данных (ГОСТ) - 0.0058, среднее отклонение 0.00097
     if x > 100000:
         return 0
     else:
@@ -91,45 +63,136 @@ def rho(x):  # модель атмосферы
                    + 4.948170131598756e-09 * x ** 2 - 1.197533162371212e-04 * x + 1.226219387339549)
 
 
-def model(duration, mu, omega):  # modeling
+def sign(num):
+    return -1 if num < 0 else 1
 
-    def f(t, arg):  # equation system
-        r, v_r, phi, v_phi, mass, mu, alpha = arg
-        return [
-            v_r,
-            -GM_EARTH / (r ** 2),
-            U / M * mu * np.sin(alpha) / r,
-            0,
-            mu,
-            0,
-            omega
-        ]
 
-    arg0 = [M, V_r, V_c, alpha, r, c]  # start f() args
-    ODE = scp.ode(f)
-    ODE.set_integrator('dopri5')
-    ODE.set_initial_value(arg0, 0)
+def model(duration, mu, omega, stage):  # modeling
+    global PLOT_DATA, GLOBAL_TIME, mass, x, y, v_y, alpha, v_x
+    if duration != 0:
+        def f(t, arg):  # equation system
+            x, v_x, y, v_y, mass, mu, alpha, omega = arg
+            oR = np.sqrt(x ** 2 + y ** 2)  # расстояние от центра земли
+            return [
+                v_x,
+                - GM_EARTH / oR ** 3 * x - sign(v_x) * 1 / 8 * stage.drag * np.pi * rho(oR) * (stage.d * v_x) ** 2 \
+                + stage.thrust * np.cos(alpha) * mu / mass,
+                v_y,
+                - GM_EARTH / oR ** 3 * y - sign(v_y) * 1 / 8 * stage.drag * np.pi * rho(oR) * (stage.d * v_y) ** 2 \
+                + stage.thrust * np.sin(alpha) * mu / mass,
+                - stage.thrust / stage.gas_speed * mu,
+                0,
+                omega,
+                0
+            ]
 
-    w = np.empty((0, 7))
-    for i in np.linspace(0, duration, round(ACCURACY * duration)):
-        w = np.vstack((w, (np.hstack((ODE.integrate(i), i + GLOBAL_TIME)))))  # склеиваю новое решение со вмеренем
+        arg0 = [x, v_x, y, v_y, mass, mu, alpha, omega]  # start f() args
+        ODE = scp.ode(f)
+        ODE.set_integrator('dopri5', nsteps=20000)
+        ODE.set_initial_value(arg0, 0)
 
-        if U / w[-1, 0] * mu > g_max:
-            print(">g_max!")
-            mu = 0
-            pass
-        elif w[-1, 0] <= M_rocket:
-            print("no fuel")
-            mu = 0
-        elif w[-1, 4] < R_moon:
-            break
+        w = np.empty((0, 9))
+        for i in np.linspace(0, duration, int(ACCURACY * duration)):
+            w = np.vstack((w, (np.hstack((ODE.integrate(i), i + GLOBAL_TIME)))))  # склеиваю новое решение со вмеренем
 
-    GLOBAL_TIME = GLOBAL_TIME + i
-    PLOT_DATA = np.vstack((PLOT_DATA, w))  # склеиваю старые значения полеты с новыми
-    print(prt(M), '\t', prt(V_r), '\t', prt(V_c * r), '\t', prt(r - R_moon), '\t', round((2 * np.pi - c) * r, 2), '\t',
-          alpha, '\t', mu, '\t', duration)
-    M = w[-1, 0]  # data updt
-    V_r = w[-1, 1]
-    V_c = w[-1, 2]
-    r = w[-1, 4]
-    c = w[-1, 5]
+        GLOBAL_TIME = GLOBAL_TIME + i
+        PLOT_DATA = np.vstack((PLOT_DATA, w))  # склеиваю старые значения полета с новыми
+        x = w[-1, 0]  # data update
+        v_x = w[-1, 1]
+        y = w[-1, 2]
+        v_y = w[-1, 3]
+        mass = w[-1, 4]
+        alpha = w[-1, 6]
+        if mass < INITIAL_MASS - stage.mass + stage.dry_mass:
+            print("first end")
+        print(mass, '\t', v_x, '\t', v_y, '\t', (x - R_EARTH), '\t', y, '\t', alpha, '\t', mu, omega)
+
+
+RN1 = RN(2145000, 135000, 34350000, 2580, 10.1, 0.1)  # РН1 (mass, dry_mass, thrust, gas_speed, d, drag)
+RN2 = RN(458700, 37600, 5115000, 4130, 10.1, 0.1)  # РН2 (mass, dry_mass, thrust, gas_speed, d, drag)
+RN3 = RN(120000, 12000, 1016000, 4130, 6.6, 0.1)  # РН3 (mass, dry_mass, thrust, gas_speed, d, drag)
+
+CM = Empty()  # Command module, командный модуль
+CM.mass = 5500
+CM.d = 3.9
+
+SM = Empty()  # Service module, служебный модуль ЛК
+SM.mass = 22500
+SM.dry_mass = 4800
+SM.thrust = 95750
+SM.gas_speed = 3050
+
+DS = Empty()  # Descent stage, посадочная ступень ЛМ
+DS.mass = 10330
+DS.dry_mass = 2165
+DS.thrust = 45040  # можно управлять!!!!!!!!!!!
+DS.gas_speed = 3050
+
+AS = Empty()  # Ascent stage, взлетная ступень ЛМ
+AS.mass = 4670
+AS.dry_mass = 2315
+AS.thrust = 15600  # можно управлять!!!!!!!!!!!
+AS.gas_speed = 3050
+
+
+
+
+# функция отображения
+def Solver(event):
+    global PLOT_DATA, GLOBAL_TIME, ACCURACY, INITIAL_MASS, x, y, v_y, alpha, v_x, mass
+
+    PLOT_DATA = np.empty((0, 9))  # пустой массив для всееееех данных
+    ACCURACY = 1
+    GLOBAL_TIME = 0
+    INITIAL_MASS = RN1.mass + RN2.mass + RN3.mass + CM.mass + SM.mass + DS.mass + AS.mass
+
+    mass = INITIAL_MASS
+    x = R_EARTH
+    v_x = 0
+    y = 0
+    v_y = 465.1013
+    alpha = 0
+
+    print('mass', '\t', 'v_x', '\t', 'v_y', '\t', 'x', '\t', 'y', '\t', 'alpha', '\t', 'mu',
+          'omega')
+
+    model(s1.duration.val, s1.mu.val, s1.omega.val, RN1)
+    model(s2.duration.val, s2.mu.val, s2.omega.val, RN1)
+
+    INITIAL_MASS -= RN1.mass
+    mass = INITIAL_MASS
+
+    model(s3.duration.val, s3.mu.val, s3.omega.val, RN2)
+    model(s4.duration.val, s4.mu.val, s4.omega.val, RN2)
+
+    INITIAL_MASS -= RN2.mass
+    mass = INITIAL_MASS
+
+    model(s5.duration.val, s5.mu.val, s5.omega.val, RN3)
+    model(s6.duration.val, s6.mu.val, s6.omega.val, RN3)
+
+    ax.clear()
+    ax.grid()
+    coefficient = 1 - R_EARTH / np.sqrt(PLOT_DATA[:, 0] ** 2 + PLOT_DATA[:, 2] ** 2)
+    ax.plot(PLOT_DATA[:, 0] * coefficient, PLOT_DATA[:, 2] * coefficient)
+    angle = np.linspace(0, 2*np.pi, 100)
+    ax.plot(185000 * np.sin(angle), 185000 * np.cos(angle))
+
+
+# Создадим окно с графиком
+fig, ax = plt.subplots()
+ax.plot(x_list, y_list)
+ax.grid()
+fig.subplots_adjust(left=0.07, right=0.95, top=0.95, bottom=0.5)
+
+# Создание слайдеров
+s1 = Sliders(0, 0, 300, 150.9, 0, 1)  # number_y, number_x, max_time, init_time, init_omega, init_mu
+s2 = Sliders(1, 0, 400, 0, 0, 1)
+s3 = Sliders(2, 0, 400, 338.7, 0, 1)
+s4 = Sliders(3, 0, 300, 0, 0, 0)
+s5 = Sliders(0, 1, 300, 0, 0, 0)
+s6 = Sliders(1, 1, 300, 0, 0, 0)
+s7 = Sliders(2, 1, 300, 0, 0, 0)
+s8 = Sliders(3, 1, 300, 0, 0, 0)
+
+plt.show()
