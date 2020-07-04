@@ -1,42 +1,30 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+from matplotlib import pyplot as plt
+from matplotlib import animation
 
+fig = plt.figure()
+fig.set_dpi(100)
+fig.set_size_inches(7, 6.5)
 
-def data_gen():
-    for cnt in range(1000):
-        t = cnt / 10
-        yield t, np.sin(2*np.pi*t) * np.exp(-t/10.)
-
+ax = plt.axes(xlim=(0, 10), ylim=(0, 10))
+patch = plt.Circle((5, -5), 0.75, fc='y')
 
 def init():
-    ax.set_ylim(-1.1, 1.1)
-    ax.set_xlim(0, 10)
-    del xdata[:]
-    del ydata[:]
-    line.set_data(xdata, ydata)
-    return line,
+    patch.center = (5, 5)
+    ax.add_patch(patch)
+    return patch,
 
-fig, ax = plt.subplots()
-line, = ax.plot([], [], lw=2)
-ax.grid()
-xdata, ydata = [], []
+def animate(i):
+    x, y = patch.center
+    x = 5 + 3 * np.sin(np.radians(i))
+    y = 5 + 3 * np.cos(np.radians(i))
+    patch.center = (x, y)
+    return patch,
 
+anim = animation.FuncAnimation(fig, animate, 
+                               init_func=init, 
+                               frames=360, 
+                               interval=20,
+                               blit=True)
 
-def run(data):
-    # update the data
-    t, y = data
-    xdata.append(t)
-    ydata.append(y)
-    xmin, xmax = ax.get_xlim()
-
-    if t >= xmax:
-        ax.set_xlim(xmin, 2*xmax)
-        ax.figure.canvas.draw()
-    line.set_data(xdata, ydata)
-
-    return line,
-
-ani = animation.FuncAnimation(fig, run, data_gen, blit=False, interval=10,
-                              repeat=False, init_func=init)
 plt.show()
