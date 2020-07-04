@@ -43,11 +43,11 @@ class Sliders(object):
         # слайдер с его min, max, и начальным значением, а так же указываем функцию, которую вызываем при изменении
         self.axes_duration = plt.axes([0.03 + number_x * 0.49, 0.42 - number_y * 0.1, 0.4, 0.02])  # положение
         self.duration = wdg.Slider(self.axes_duration, valmin=0, valmax=max_time, label='t', valinit=init_time,
-                                   valfmt='%1.1f')  # мин, макс, лейбл, начальное значение
+                                   valfmt='%1.3f')  # мин, макс, лейбл, начальное значение
         self.duration.on_changed(Solver)  # вызов функции при обновлении обновления
 
         self.axes_omega = plt.axes([0.03 + number_x * 0.49, 0.39 - number_y * 0.1, 0.4, 0.02])
-        self.omega = wdg.Slider(self.axes_omega, valmin=-1, valmax=1, label='ω', valinit=init_omega, valfmt='%1.2f')
+        self.omega = wdg.Slider(self.axes_omega, valmin=-1, valmax=1, label='ω', valinit=init_omega, valfmt='%1.5f')
         self.omega.on_changed(Solver)
 
         self.axes_mu = plt.axes([0.03 + number_x * 0.49, 0.36 - number_y * 0.1, 0.4, 0.02])
@@ -167,11 +167,12 @@ def Solver(event):
     INITIAL_MASS -= RN3.mass
     mass = INITIAL_MASS
     OMEGA_MAX *= 5
-    ACCURACY = 0.005
 
-    model(s3.duration.val, s3.mu.val, s3.omega.val, SM)
+    ACCURACY = 0.005
+    model(s3.duration.val, s3.mu.val, s3.omega.val, RN3)
 
     ACCURACY = 1
+
     model(s4.duration.val, s4.mu.val, s4.omega.val, SM)
     model(s5.duration.val, s5.mu.val, s5.omega.val, SM)
     model(s6.duration.val, s6.mu.val, s6.omega.val, SM)
@@ -204,12 +205,12 @@ ax.grid()
 fig.subplots_adjust(left=0.07, right=0.95, top=0.95, bottom=0.5)
 
 # Создание слайдеров
-s1 = Sliders(0, 0, 400, 108.1, -0.532, 0)  # number_y, number_x, max_time, init_time, init_omega, init_mu
-s2 = Sliders(1, 0, 400, 309.31, 0, 1)
-s3 = Sliders(2, 0, 400000, 212708.5, 0, 0)
-s4 = Sliders(3, 0, 400, 0, -1, 0)
-s5 = Sliders(0, 1, 20000, 0, 0, 0)
-s6 = Sliders(1, 1, 5000, 0, 0, 1)
+s1 = Sliders(0, 0, 400, 174.9, -0.31, 0)  # number_y, number_x, max_time, init_time, init_omega, init_mu
+s2 = Sliders(1, 0, 400, 309.45, 0, 1)
+s3 = Sliders(2, 0, 400000, 260104.2, 0, 0)
+s4 = Sliders(3, 0, 600, 0, 0, 0)
+s5 = Sliders(0, 1, 400, 0, 0, 1)
+s6 = Sliders(1, 1, 400, 0, 0, 0)
 s7 = Sliders(2, 1, 1000, 0, 0, 0)
 s8 = Sliders(3, 1, 20000, 0, 0, 0)
 
