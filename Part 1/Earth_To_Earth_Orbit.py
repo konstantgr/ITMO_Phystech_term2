@@ -16,6 +16,7 @@ g_MOON = 1.62
 GM_EARTH = R_EARTH ** 2 * 9.81
 GM_MOON = R_MOON ** 2 * 1.62
 OMEGA_MAX = np.pi / 180  # для ЛК - в пять раз больше!!!!
+OMEGA_EARTH = 7.29211585e-5
 
 
 # класс РН
@@ -77,11 +78,11 @@ def model(duration, mu, omega, stage):  # modeling
             oR = np.sqrt(x ** 2 + y ** 2)  # расстояние от центра земли
             return [
                 v_x,
-                - GM_EARTH / oR ** 3 * x - sign(v_x) * 1 / 8 * stage.drag * np.pi * rho(oR) * (stage.d * v_x) ** 2 \
-                + stage.thrust * np.cos(alpha) * mu / mass,
+                - GM_EARTH / oR ** 3 * x - sign(v_x + OMEGA_EARTH * y) * 1 / 8 * stage.drag * np.pi * rho(oR) \
+                * (stage.d * (v_x + OMEGA_EARTH * y)) ** 2 + stage.thrust * np.cos(alpha) * mu / mass,
                 v_y,
-                - GM_EARTH / oR ** 3 * y - sign(v_y) * 1 / 8 * stage.drag * np.pi * rho(oR) * (stage.d * v_y) ** 2 \
-                + stage.thrust * np.sin(alpha) * mu / mass,
+                - GM_EARTH / oR ** 3 * y - sign(v_y - OMEGA_EARTH * x) * 1 / 8 * stage.drag * np.pi * rho(oR) \
+                * (stage.d * (v_y - OMEGA_EARTH * x)) ** 2 + stage.thrust * np.sin(alpha) * mu / mass,
                 - stage.thrust / stage.gas_speed * mu,
                 0,
                 omega,
@@ -181,7 +182,7 @@ def Solver(event):
 
     ax.plot(PLOT_DATA[:, 0], PLOT_DATA[:, 2])
     angle = np.linspace(0, 2 * np.pi, 1000)
-    ax.plot((185000 + R_EARTH) * np.sin(angle), (185000 + R_EARTH) * np.cos(angle))
+    ax.plot((190000 + R_EARTH) * np.sin(angle), (190000 + R_EARTH) * np.cos(angle))
     ax.plot(R_EARTH * np.sin(angle), R_EARTH * np.cos(angle))
 
 
@@ -193,13 +194,13 @@ ax.grid()
 fig.subplots_adjust(left=0.07, right=0.95, top=0.95, bottom=0.5)
 
 # Создание слайдеров
-s1 = Sliders(0, 0, 300, 79.6, 0.50, 1)  # number_y, number_x, max_time, init_time, init_omega, init_mu
-s2 = Sliders(1, 0, 300, 70.8, 0.23, 1)
-s3 = Sliders(2, 0, 500, 108.9, -0.01, 1)
-s4 = Sliders(3, 0, 500, 224.4, 0.20, 1)
-s5 = Sliders(0, 1, 1000, 193.4, 0.10, 1)
-s6 = Sliders(1, 1, 5000, 3650, 0, 0)
-s7 = Sliders(2, 1, 180, 0, 0, 0)
+s1 = Sliders(0, 0, 300, 79.6, 0.60, 1)  # number_y, number_x, max_time, init_time, init_omega, init_mu
+s2 = Sliders(1, 0, 300, 70.8, 0.19, 1)
+s3 = Sliders(2, 0, 500, 109, 0, 1)
+s4 = Sliders(3, 0, 500, 229.6, 0.18, 1)
+s5 = Sliders(0, 1, 1000, 129.7, 0.10, 1)
+s6 = Sliders(1, 1, 5000, 2900, 0, 0)
+s7 = Sliders(2, 1, 180, 115, -1, 0)
 s8 = Sliders(3, 1, 300, 0, 0, 0)
 
 plt.show()
