@@ -154,7 +154,7 @@ def Solver(event):
     x = R_EARTH
     v_x = 0
     y = 0
-    v_y = 465.1013
+    v_y = R_EARTH * OMEGA_EARTH
     alpha = 0
 
     print('x', '\t', 'v_x', '\t', 'y', '\t', 'v_y', '\t', 'mass', '\t', 'mu', '\t', 'alpha', '\t', 'omega * OMEGA_MAX',
