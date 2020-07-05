@@ -1,30 +1,21 @@
 import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib import animation
+import matplotlib.pyplot as plt
+import math as m
+from scipy.integrate import ode
 
-fig = plt.figure()
-fig.set_dpi(100)
-fig.set_size_inches(7, 6.5)
+fig1, ax1 = plt.subplots()
+PLOT_DATA = np.genfromtxt('Earth_Orbit_To_Moon_Orbit', delimiter=',')
+ax1.plot(PLOT_DATA[:, -1], np.sqrt(PLOT_DATA[:, 1] ** 2 + PLOT_DATA[:, 3] ** 2))
+ax1.grid()
+ax1.set_xlabel('время (с)')
+ax1.set_ylabel('скорость (м/с)')
+fig1.set_size_inches(6, 6)
 
-ax = plt.axes(xlim=(0, 10), ylim=(0, 10))
-patch = plt.Circle((5, -5), 0.75, fc='y')
-
-def init():
-    patch.center = (5, 5)
-    ax.add_patch(patch)
-    return patch,
-
-def animate(i):
-    x, y = patch.center
-    x = 5 + 3 * np.sin(np.radians(i))
-    y = 5 + 3 * np.cos(np.radians(i))
-    patch.center = (x, y)
-    return patch,
-
-anim = animation.FuncAnimation(fig, animate, 
-                               init_func=init, 
-                               frames=360, 
-                               interval=20,
-                               blit=True)
+fig2, ax2 = plt.subplots()
+ax2.plot(PLOT_DATA[:, -1], (np.sqrt(PLOT_DATA[:, 0] ** 2 + PLOT_DATA[:, 2] ** 2) - 6375000) / 1000000)
+ax2.grid()
+ax2.set_xlabel('время (с)')
+ax2.set_ylabel('высота (10e3 км)')
+fig2.set_size_inches(6, 6)
 
 plt.show()
