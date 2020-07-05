@@ -4,7 +4,7 @@ import math as m
 from scipy.integrate import ode
 
 fig1, ax1 = plt.subplots()
-PLOT_DATA = np.genfromtxt('Earth_Orbit_To_Moon_Orbit', delimiter=',')
+PLOT_DATA = np.genfromtxt('Part 1/Earth_Orbit_To_Moon_Orbit', delimiter=',')
 ax1.plot(PLOT_DATA[:, -1], np.sqrt(PLOT_DATA[:, 1] ** 2 + PLOT_DATA[:, 3] ** 2))
 ax1.grid()
 ax1.set_xlabel('время (с)')
