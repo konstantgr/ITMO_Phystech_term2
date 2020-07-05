@@ -17,7 +17,9 @@ fig = plt.figure()
 ax = plt.axes()
 ax.set_aspect('equal', adjustable='box')
 patch = plt.Circle((0, 0), R_MOON, fc='0.75')
-patch2 = plt.Circle((0, 0), 30000, color='r')
+patch2 = plt.Circle((0, 0), 10000, color='r')
+patch3 = plt.Circle((0, 0), 10000, color='b')
+
 line, = ax.plot([], [], lw=2)
 line2, = ax.plot([], [], lw=2)
 
@@ -40,13 +42,15 @@ def init():
     
     time_text.set_text('')
 
+    patch3.center = (0, 0)
     patch2.center = (0, 0)
     patch.center = (0, 0)
     
+    ax.add_patch(patch3)
     ax.add_patch(patch2)
     ax.add_patch(patch)
     
-    return line, line2, time_text, patch, patch2
+    return line, line2, time_text, patch, patch2, patch3
 
 def get_coord(filename):
     x_ar = np.array([])
@@ -63,13 +67,13 @@ def get_coord(filename):
     return (x_ar, y_ar, time)
 
 
-x, y, time = get_coord('Part 2/Moon_Orbit_To_Moon')
-x_2, y_2, time_2 = get_coord('Part 2/Moon_To_Moon_Orbit')
-x_cmsm, y_cmsm, time_cmsm = get_coord('Part 2/Moon_Orbit_CMSM')
+x, y, time = get_coord('Part 2/Moon_To_Moon_Orbit')
+#x_2, y_2, time_2 = get_coord('Part 2/Moon_To_Moon_Orbit')
+x_cmsm, y_cmsm, time_cmsm = get_coord('Part 2/Moon_Orbit_CMSM_fot_animation')
 
-x = np.append(x, x_2)
-y = np.append(y, y_2)
-time = np.append(time, time_2)
+#x = np.append(x, x_2)
+#y = np.append(y, y_2)
+#time = np.append(time, time_2)
 
 
 
@@ -77,23 +81,25 @@ def animate(i):
     global x, y, time
    
     # анимашки
-    patch2.center = (x[i*20], y[i*20])
+    patch2.center = (x[(i-1)*3], y[(i-1)*3])
+    #patch3.center = (x_cmsm[i*3], y_cmsm[i*3])
     patch.center = (0, 0)
-    ax.set_ylim(-R_MOON - 1000000, R_MOON + 1000000) 
-    ax.set_xlim(-R_MOON - 1000000, R_MOON + 1000000)
-    
+    ax.set_ylim(-R_MOON - 100000, 0) 
+    ax.set_xlim(-R_MOON - 100000, 0)
+    # ax.set_ylim(y[i*3] - 100000, y[i*3] + 100000) 
+    # ax.set_xlim(x[i*3] - 100000, x[i*3] + 100000)
     ax.set_aspect('equal', adjustable='box')
     ax.figure.canvas.draw()
-    #line.set_data(x_cmsm[:i*3], y_cmsm[:i*3])
-    line2.set_data(x[:i*20], y[:i*20])
+    line.set_data(x_cmsm[:i*3], y_cmsm[:i*3])
+    line2.set_data(x[:i*3], y[:i*3])
     
    
     time_text.set_text(time_template % (time[i*3]/3600))
 
-    return line, line2, time_text, patch, patch2
+    return line, line2, time_text, patch, patch2, patch3
 
 anim = animation.FuncAnimation(fig, animate, init_func=init,
-                                frames=math.floor(max(len(x)/20, len(x_cmsm)/20)), interval=1, repeat=False, blit=True)
+                                frames=math.floor(max(len(x)/3, len(x_cmsm)/3)), interval=1, repeat=False, blit=True)
 
-#anim.save('From_Moon_To_Moon_Orbit.gif', writer='imagemagick')
+#anim.save('From_Moon_To_Moon_Orbit_2.gif', writer='imagemagick')
 plt.show()
