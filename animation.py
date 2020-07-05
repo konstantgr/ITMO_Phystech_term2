@@ -81,51 +81,51 @@ def dif_coord(x, y, t):
     return x, y
 
 x, y, time = get_coord('Part 1/Earth_To_Earth_Orbit')
-x_1, y_1, time_1 = get_coord('Part 1/Earth_Orbit_To_Moon_Orbit')
-x_2, y_2, time_2 = get_coord('Part 2/Moon_Orbit_To_Moon')
-x_3, y_3, time_3 = get_coord('Part 2/Moon_To_Moon_Orbit')
-x_4, y_4, time_4 = get_coord('Part 3/Moon_Orbit_To_Earth_Orbit')
-x_5, y_5, time_5 = get_coord('Part 3/Earth_Orbit_To_Earth')
+# x_1, y_1, time_1 = get_coord('Part 1/Earth_Orbit_To_Moon_Orbit')
+# x_2, y_2, time_2 = get_coord('Part 2/Moon_Orbit_To_Moon')
+# x_3, y_3, time_3 = get_coord('Part 2/Moon_To_Moon_Orbit')
+# x_4, y_4, time_4 = get_coord('Part 3/Moon_Orbit_To_Earth_Orbit')
+# x_5, y_5, time_5 = get_coord('Part 3/Earth_Orbit_To_Earth')
 
-x_cmsm, y_cmsm, time_cmsm = get_coord('Part 2/Moon_Orbit_CMSM')
-print(time_2[0])
-x = np.append(x, x_1)
-y = np.append(y, y_1)
-x_copy = copy.copy(x)
-y_copy = copy.copy(y)
-
-
-x_2, y_2 = dif_coord(x_2, y_2, time_2)
-x_3, y_3 = dif_coord(x_3, y_3, time_3)
-x_cmsm, y_cmsm = dif_coord(x_cmsm, y_cmsm, time_cmsm)
-
-x_copy = np.append(x_copy, x_cmsm)
-y_copy = np.append(y_copy, y_cmsm)
-
-x = np.append(x, x_2)
-y = np.append(y, y_2)
-
-x = np.append(x, x_3)
-y = np.append(y, y_3)
-
-x = np.append(x, x_4)
-y = np.append(y, y_4)
-
-x = np.append(x, x_5)
-y = np.append(y, y_5)
+# x_cmsm, y_cmsm, time_cmsm = get_coord('Part 2/Moon_Orbit_CMSM')
+# print(time_2[0])
+# x = np.append(x, x_1)
+# y = np.append(y, y_1)
+# x_copy = copy.copy(x)
+# y_copy = copy.copy(y)
 
 
-time = np.append(time, time_1)
-time_copy = copy.copy(time)
+# x_2, y_2 = dif_coord(x_2, y_2, time_2)
+# x_3, y_3 = dif_coord(x_3, y_3, time_3)
+# x_cmsm, y_cmsm = dif_coord(x_cmsm, y_cmsm, time_cmsm)
 
-time = np.append(time, time_2)
+# x_copy = np.append(x_copy, x_cmsm)
+# y_copy = np.append(y_copy, y_cmsm)
 
-time = np.append(time, time_3)
-time = np.append(time, time_4)
-time = np.append(time, time_5)
+# x = np.append(x, x_2)
+# y = np.append(y, y_2)
+
+# x = np.append(x, x_3)
+# y = np.append(y, y_3)
+
+# x = np.append(x, x_4)
+# y = np.append(y, y_4)
+
+# x = np.append(x, x_5)
+# y = np.append(y, y_5)
 
 
-time_copy = np.append(time_copy, time_cmsm)
+# time = np.append(time, time_1)
+# time_copy = copy.copy(time)
+
+# time = np.append(time, time_2)
+
+# time = np.append(time, time_3)
+# time = np.append(time, time_4)
+# time = np.append(time, time_5)
+
+
+# time_copy = np.append(time_copy, time_cmsm)
 
 # ax.plot(x, y)
 # plt.show()
@@ -139,48 +139,48 @@ time_copy = np.append(time_copy, time_cmsm)
 
 
 def animate(i):
-    global x, y, time, x_copy, y_copy, time_copy
+    global x, y, time
     #Обычные Анимашки
-    # limx = max(x[:i*20])
-    # limy = max(y[:i*20])
-    # lim = max(limx, limy) + 300000
-    # ax.set_ylim(-lim, lim) 
-    # ax.set_xlim(-lim, lim)
-    # Прикольные анимашки
-    ax.plot(moon_pos(time[:i * 20])[0], moon_pos(time[:i * 20])[1], 'r')
-    patch2.center = (R_EARTH_MOON * np.cos(OMEGA_MOON * time[i*20]), R_EARTH_MOON * np.sin(OMEGA_MOON * time[i*20]))
-    patch.center = (R_EARTH_MOON * np.cos(OMEGA_MOON * time[i*20]), R_EARTH_MOON * np.sin(OMEGA_MOON * time[i*20]))
-    #patch3.center = (0, 0)
-    if time[i*20] <= 1303.7:
-        ax.set_ylim(y[i*20] - 100000, y[i*20] + 100000) 
-        ax.set_xlim(x[i*20] - 100000, x[i*20] + 100000)
-    elif time[i*20] <= 8633.7: # Полет до вылета с земли
-        ax.set_ylim(y[i*20] - 10000000, y[i*20] + 10000000) 
-        ax.set_xlim(x[i*20] - 10000000, x[i*20] + 10000000)
-    elif time[i*20] <= 197544.2: # Полет до Луны далекий план
-        ax.set_ylim(-3*R_EARTH,R_EARTH_MOON + R_MOON + 10000000) 
-        ax.set_xlim(-3*R_EARTH,R_EARTH_MOON + R_MOON + 10000000)  
-    elif time[i*20] <= 274831.0: # Полет до Луны близкий план до отстыковки
-        #line2.set_data(x_copy[:i*20], y_copy[:i*20])
-        ax.set_ylim(y[i*20] - 10000000, y[i*20] + 10000000) 
-        ax.set_xlim(x[i*20] - 10000000, x[i*20] + 10000000)
-    elif time[i*20] <= 296200.9072034865:
-        #time.
-        ax.set_ylim(y[i*20] - 100000, y[i*20] + 100000) 
-        ax.set_xlim(x[i*20] - 100000, x[i*20] + 100000)
-    elif time[i*20] <= 304025.9072034865:        
-        #print(list(time_cmsm).index(int(time[i*20])))
-        ax.set_ylim(y[i*20] - 10000000, y[i*20] + 10000000) 
-        ax.set_xlim(x[i*20] - 10000000, x[i*20] + 10000000)
-    elif time[i*20] < 140.7 * 3600: # Полет до Луны далекий план
-        ax.set_ylim(-3*R_EARTH,R_EARTH_MOON + R_MOON + 10000000) 
-        ax.set_xlim(-3*R_EARTH,R_EARTH_MOON + R_MOON + 10000000)  
-    elif time[i*20] < 141.4 * 3600:
-        ax.set_ylim(y[i*20] - 1000000, y[i*20] + 1000000) 
-        ax.set_xlim(x[i*20] - 1000000, x[i*20] + 1000000)
-    else:
-        ax.set_ylim(y[i*20] - 100000, y[i*20] + 100000) 
-        ax.set_xlim(x[i*20] - 100000, x[i*20] + 100000)
+    limx = max(x[:i*20 + 1])
+    limy = max(y[:i*20 + 1])
+    lim = max(limx, limy) + 300000
+    ax.set_ylim(-lim, lim) 
+    ax.set_xlim(-lim, lim)
+    # # Прикольные анимашки
+    # ax.plot(moon_pos(time[:i * 20])[0], moon_pos(time[:i * 20])[1], 'r')
+    # patch2.center = (R_EARTH_MOON * np.cos(OMEGA_MOON * time[i*20]), R_EARTH_MOON * np.sin(OMEGA_MOON * time[i*20]))
+    # patch.center = (R_EARTH_MOON * np.cos(OMEGA_MOON * time[i*20]), R_EARTH_MOON * np.sin(OMEGA_MOON * time[i*20]))
+    # #patch3.center = (0, 0)
+    # if time[i*20] <= 1303.7:
+    #     ax.set_ylim(y[i*20] - 100000, y[i*20] + 100000) 
+    #     ax.set_xlim(x[i*20] - 100000, x[i*20] + 100000)
+    # elif time[i*20] <= 8633.7: # Полет до вылета с земли
+    #     ax.set_ylim(y[i*20] - 10000000, y[i*20] + 10000000) 
+    #     ax.set_xlim(x[i*20] - 10000000, x[i*20] + 10000000)
+    # elif time[i*20] <= 197544.2: # Полет до Луны далекий план
+    #     ax.set_ylim(-3*R_EARTH,R_EARTH_MOON + R_MOON + 10000000) 
+    #     ax.set_xlim(-3*R_EARTH,R_EARTH_MOON + R_MOON + 10000000)  
+    # elif time[i*20] <= 274831.0: # Полет до Луны близкий план до отстыковки
+    #     #line2.set_data(x_copy[:i*20], y_copy[:i*20])
+    #     ax.set_ylim(y[i*20] - 10000000, y[i*20] + 10000000) 
+    #     ax.set_xlim(x[i*20] - 10000000, x[i*20] + 10000000)
+    # elif time[i*20] <= 296200.9072034865:
+    #     #time.
+    #     ax.set_ylim(y[i*20] - 100000, y[i*20] + 100000) 
+    #     ax.set_xlim(x[i*20] - 100000, x[i*20] + 100000)
+    # elif time[i*20] <= 304025.9072034865:        
+    #     #print(list(time_cmsm).index(int(time[i*20])))
+    #     ax.set_ylim(y[i*20] - 10000000, y[i*20] + 10000000) 
+    #     ax.set_xlim(x[i*20] - 10000000, x[i*20] + 10000000)
+    # elif time[i*20] < 140.7 * 3600: # Полет до Луны далекий план
+    #     ax.set_ylim(-3*R_EARTH,R_EARTH_MOON + R_MOON + 10000000) 
+    #     ax.set_xlim(-3*R_EARTH,R_EARTH_MOON + R_MOON + 10000000)  
+    # elif time[i*20] < 141.4 * 3600:
+    #     ax.set_ylim(y[i*20] - 1000000, y[i*20] + 1000000) 
+    #     ax.set_xlim(x[i*20] - 1000000, x[i*20] + 1000000)
+    # else:
+    #     ax.set_ylim(y[i*20] - 100000, y[i*20] + 100000) 
+    #     ax.set_xlim(x[i*20] - 100000, x[i*20] + 100000)
     ax.set_aspect('equal', adjustable='box')
     ax.figure.canvas.draw()
     
@@ -194,5 +194,6 @@ def animate(i):
     return line, line2, time_text, patch, patch2, patch3
 
 anim = animation.FuncAnimation(fig, animate, init_func=init, frames=math.floor(len(x)/20), interval=1, repeat=False, blit=True)
-anim.save('To_Earth_Orbit.gif', writer='imagemagick')
+#plt.show()
+anim.save('To_Earth_Orbit_3.gif', writer='imagemagick')
 print(1)
