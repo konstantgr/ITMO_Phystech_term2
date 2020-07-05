@@ -13,7 +13,7 @@ GM_MOON = R_MOON ** 2 * 1.62
 R_EARTH_MOON = 384405000
 OMEGA_MOON = np.sqrt(GM_EARTH / (R_EARTH_MOON ** 3))
 
-fig = plt.figure(figsize=(10,10))
+fig = plt.figure(figsize=(7,7))
 #plt.axis('off')
 plt.gca().xaxis.set_major_locator(plt.NullLocator())
 plt.gca().yaxis.set_major_locator(plt.NullLocator())
