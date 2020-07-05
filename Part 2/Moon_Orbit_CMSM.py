@@ -17,11 +17,8 @@ GM_EARTH = R_EARTH ** 2 * 9.81
 GM_MOON = R_MOON ** 2 * 1.62
 R_EARTH_MOON = 384405000
 OMEGA_MOON = np.sqrt(GM_EARTH / (R_EARTH_MOON ** 3))
-G_MAX = 10 * g_EARTH
 
-DEBUG = False
-
-
+DEBUG = True
 
 
 # класс РН
@@ -46,15 +43,15 @@ class Sliders(object):
         # слайдер с его min, max, и начальным значением, а так же указываем функцию, которую вызываем при изменении
         self.axes_duration = plt.axes([0.03 + number_x * 0.49, 0.42 - number_y * 0.1, 0.4, 0.02])  # положение
         self.duration = wdg.Slider(self.axes_duration, valmin=0, valmax=max_time, label='t', valinit=init_time,
-                                   valfmt='%1.3f')  # мин, макс, лейбл, начальное значение
+                                   valfmt='%1.4f')  # мин, макс, лейбл, начальное значение
         self.duration.on_changed(Solver)  # вызов функции при обновлении обновления
 
         self.axes_omega = plt.axes([0.03 + number_x * 0.49, 0.39 - number_y * 0.1, 0.4, 0.02])
-        self.omega = wdg.Slider(self.axes_omega, valmin=-1, valmax=1, label='ω', valinit=init_omega, valfmt='%1.3f')
+        self.omega = wdg.Slider(self.axes_omega, valmin=-1, valmax=1, label='ω', valinit=init_omega, valfmt='%1.4f')
         self.omega.on_changed(Solver)
 
         self.axes_mu = plt.axes([0.03 + number_x * 0.49, 0.36 - number_y * 0.1, 0.4, 0.02])
-        self.mu = wdg.Slider(self.axes_mu, valmin=0, valmax=1, label='μ', valinit=init_mu, valfmt='%1.3f')
+        self.mu = wdg.Slider(self.axes_mu, valmin=0, valmax=1, label='μ', valinit=init_mu, valfmt='%1.4f')
         self.mu.on_changed(Solver)
 
 
@@ -67,7 +64,7 @@ def moon_pos(t):
 
 
 def model(duration, mu, omega, stage):  # modeling
-    global PLOT_DATA, GLOBAL_TIME, OMEGA_MAX, G_MAX, mass, x, y, v_y, alpha, v_x
+    global PLOT_DATA, GLOBAL_TIME, OMEGA_MAX, mass, x, y, v_y, alpha, v_x
     if duration != 0:
         def f(t, arg):  # equation system
             x, v_x, y, v_y, mass, mu, alpha, omega = arg
@@ -102,8 +99,6 @@ def model(duration, mu, omega, stage):  # modeling
         alpha = w[-1, 6]
         if mass < INITIAL_MASS - stage.mass + stage.dry_mass:
             print("first end")
-        if abs(stage.thrust * mu / mass) > G_MAX:
-            print('DEATH')
         print(x, '\t', v_x, '\t', y, '\t', v_y, '\t', mass, '\t', mu, '\t', alpha, '\t', omega * OMEGA_MAX,
               np.sqrt(v_x ** 2 + v_y ** 2))
         print(np.sqrt(x ** 2 + y ** 2) - R_MOON)
@@ -143,49 +138,50 @@ def Solver(event):
     global PLOT_DATA, CMSM_DATA, GLOBAL_TIME, ACCURACY, INITIAL_MASS, OMEGA_MAX, x, y, v_y, alpha, v_x, mass
 
     PLOT_DATA = np.empty((0, 9))  # пустой массив для всееееех данных
-    CMSM_DATA = np.genfromtxt('Moon_Orbit_CMSM', delimiter=',')[-1]
     ACCURACY = 1
-    INITIAL_MASS = AS.mass
-    OMEGA_MAX = 5 * np.pi / 180  # для ЛК
+    OMEGA_MAX = 5 * np.pi / 180  # для ЛК - в пять раз больше!!!!
 
-    x, v_x, y, v_y, mass, mu, alpha, omega, GLOBAL_TIME = np.genfromtxt('Moon_Orbit_To_Moon', delimiter=',')[-1]
-
-    GLOBAL_TIME = 3.029101889000000665e+05 - 7.096070999999999913e+03
-    v_x = 0
-    v_y = 0
-    alpha = - 2.408554
+    x, v_x, y, v_y, mass, mu, alpha, omega, GLOBAL_TIME = np.genfromtxt('CMSM_DATA', delimiter=',')
+    INITIAL_MASS = mass - DS.mass - AS.mass
     mass = INITIAL_MASS
-    betha = np.arctan(-y/(-x))
-    x = - R_MOON * np.cos(OMEGA_MOON * 20900 + betha)
-    y = - R_MOON * np.sin(OMEGA_MOON * 20900 + betha)
 
     print('x', '\t', 'v_x', '\t', 'y', '\t', 'v_y', '\t', 'mass', '\t', 'mu', '\t', 'alpha', '\t', 'omega * OMEGA_MAX',
           'np.sqrt(v_x ** 2 + v_y ** 2)')
 
-    # выход на орбиту
-    model(s1.duration.val, s1.mu.val, s1.omega.val, AS)
-    model(s2.duration.val, s2.mu.val, s2.omega.val, AS)
-    model(s3.duration.val, s3.mu.val, s3.omega.val, AS)
-
-    # подключение лунного модуля
-
-    model(s4.duration.val, s4.mu.val, s4.omega.val, AS)
+    # полет по орбите
     ACCURACY = 0.02
-    model(s5.duration.val, s5.mu.val, s5.omega.val, AS)
+    model(s1.duration.val, s1.mu.val, s1.omega.val, SM)
+    ACCURACY = 1
+    model(s2.duration.val, s2.mu.val, s2.omega.val, SM)
+    model(s3.duration.val, s3.mu.val, s3.omega.val, SM)
+    ACCURACY = 0.02
+    model(s4.duration.val, s4.mu.val, s4.omega.val, SM)
+    ACCURACY = 0.02
+    model(s5.duration.val, s5.mu.val, s5.omega.val, SM)
+    model(s6.duration.val, s6.mu.val, s6.omega.val, SM)
     ACCURACY = 10
-    model(s6.duration.val, s6.mu.val, s6.omega.val, AS)
-    model(s7.duration.val, s7.mu.val, s7.omega.val, AS)
-    model(s8.duration.val, s8.mu.val, s8.omega.val, AS)
+
+    #стыковка #
+
+    ACCURACY = 0.02
+    model(s7.duration.val, s7.mu.val, s7.omega.val, SM)
+    model(s8.duration.val, s8.mu.val, s8.omega.val, SM)
 
     ax.clear()
     ax.grid()
+
     ax.plot(PLOT_DATA[:, 0], PLOT_DATA[:, 2])
-    angle = np.linspace(0, 2 * np.pi, 2000)
+    angle = np.linspace(0, 2 * np.pi, 1000)
     ax.plot(R_MOON * np.sin(angle), R_MOON * np.cos(angle))
     ax.plot((50000 + R_MOON) * np.sin(angle), (50000 + R_MOON) * np.cos(angle))
-    print('R: ', np.sqrt(x ** 2 + y ** 2) - R_MOON - 54818)
-    print('x: ', x + 1487898)
-    print('y: ', y + 1000178)
+    a = -np.arctan(moon_pos(GLOBAL_TIME)[0] / moon_pos(GLOBAL_TIME)[1]) - np.pi / 2
+    angle = np.linspace(a - 1000 / R_MOON, a + 1000 / R_MOON, 100)
+    ax.plot(R_MOON * np.cos(angle), R_MOON * np.sin(angle))
+    angle = np.linspace(0, 2 * np.pi, 100)
+    ax.plot(30000*np.cos(angle) + x, 30000*np.sin(angle) + y)
+    print('R: ', np.sqrt(x ** 2 + y ** 2) - R_MOON - 44269)
+    print('x: ', x + 1475268)
+    print('y: ', y + 1000034)
 
 
 # Создадим окно с графиком
@@ -196,16 +192,16 @@ ax.grid()
 fig.subplots_adjust(left=0.07, right=0.95, top=0.95, bottom=0.5)
 
 # Создание слайдеров
-s1 = Sliders(0, 0, 200, 192.552, -0.078, 1)  # number_y, number_x, max_time, init_time, init_omega, init_mu
-s2 = Sliders(1, 0, 300, 239.378, -0.023, 1)
-s3 = Sliders(2, 0, 300, 0, 0, 0)
-s4 = Sliders(3, 0, 300, 0, 0, 0)
-s5 = Sliders(0, 1, 20000, 6656.250, 0, 0)
-s6 = Sliders(1, 1, 100, 7.891, 0, 0)
-s7 = Sliders(2, 1, 100, 0, 0, 0)
-s8 = Sliders(3, 1, 100, 0, 0, 0)
+s1 = Sliders(0, 0, 18000, 4675.4237, 0, 0)  # number_y, number_x, max_time, init_time, init_omega, init_mu
+s2 = Sliders(1, 0, 400, 2.6870, 0, 1)
+s3 = Sliders(2, 0, 400, 14.8852, 0, 0)
+s4 = Sliders(3, 0, 20000, 20000, 0, 0)
+s5 = Sliders(0, 1, 5000, 2663.943, 0, 0)
+s6 = Sliders(1, 1, 400, 169.4, 0, 0)
+s7 = Sliders(2, 1, 4000, 4000, 0, 0)
+s8 = Sliders(3, 1, 4000, 1096.875, 0, 0)
 
 plt.show()
 
-np.savetxt('Moon_To_Moon_Orbit', PLOT_DATA, delimiter=',')
+np.savetxt('Moon_Orbit_CMSM', PLOT_DATA, delimiter=',')
 # x 	 v_x 	 y 	 v_y 	 mass 	 mu 	 alpha 	 omega * OMEGA_MAX      time
