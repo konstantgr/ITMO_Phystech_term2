@@ -81,51 +81,51 @@ def dif_coord(x, y, t):
     return x, y
 
 x, y, time = get_coord('Part 1/Earth_To_Earth_Orbit')
-# x_1, y_1, time_1 = get_coord('Part 1/Earth_Orbit_To_Moon_Orbit')
-# x_2, y_2, time_2 = get_coord('Part 2/Moon_Orbit_To_Moon')
-# x_3, y_3, time_3 = get_coord('Part 2/Moon_To_Moon_Orbit')
-# x_4, y_4, time_4 = get_coord('Part 3/Moon_Orbit_To_Earth_Orbit')
-# x_5, y_5, time_5 = get_coord('Part 3/Earth_Orbit_To_Earth')
+x_1, y_1, time_1 = get_coord('Part 1/Earth_Orbit_To_Moon_Orbit')
+x_2, y_2, time_2 = get_coord('Part 2/Moon_Orbit_To_Moon')
+x_3, y_3, time_3 = get_coord('Part 2/Moon_To_Moon_Orbit')
+x_4, y_4, time_4 = get_coord('Part 3/Moon_Orbit_To_Earth_Orbit')
+x_5, y_5, time_5 = get_coord('Part 3/Earth_Orbit_To_Earth')
 
-# x_cmsm, y_cmsm, time_cmsm = get_coord('Part 2/Moon_Orbit_CMSM')
-# print(time_2[0])
-# x = np.append(x, x_1)
-# y = np.append(y, y_1)
-# x_copy = copy.copy(x)
-# y_copy = copy.copy(y)
-
-
-# x_2, y_2 = dif_coord(x_2, y_2, time_2)
-# x_3, y_3 = dif_coord(x_3, y_3, time_3)
-# x_cmsm, y_cmsm = dif_coord(x_cmsm, y_cmsm, time_cmsm)
-
-# x_copy = np.append(x_copy, x_cmsm)
-# y_copy = np.append(y_copy, y_cmsm)
-
-# x = np.append(x, x_2)
-# y = np.append(y, y_2)
-
-# x = np.append(x, x_3)
-# y = np.append(y, y_3)
-
-# x = np.append(x, x_4)
-# y = np.append(y, y_4)
-
-# x = np.append(x, x_5)
-# y = np.append(y, y_5)
+x_cmsm, y_cmsm, time_cmsm = get_coord('Part 2/Moon_Orbit_CMSM')
+print(time_2[0])
+x = np.append(x, x_1)
+y = np.append(y, y_1)
+x_copy = copy.copy(x)
+y_copy = copy.copy(y)
 
 
-# time = np.append(time, time_1)
-# time_copy = copy.copy(time)
+x_2, y_2 = dif_coord(x_2, y_2, time_2)
+x_3, y_3 = dif_coord(x_3, y_3, time_3)
+x_cmsm, y_cmsm = dif_coord(x_cmsm, y_cmsm, time_cmsm)
 
-# time = np.append(time, time_2)
+x_copy = np.append(x_copy, x_cmsm)
+y_copy = np.append(y_copy, y_cmsm)
 
-# time = np.append(time, time_3)
-# time = np.append(time, time_4)
-# time = np.append(time, time_5)
+x = np.append(x, x_2)
+y = np.append(y, y_2)
+
+x = np.append(x, x_3)
+y = np.append(y, y_3)
+
+x = np.append(x, x_4)
+y = np.append(y, y_4)
+
+x = np.append(x, x_5)
+y = np.append(y, y_5)
 
 
-# time_copy = np.append(time_copy, time_cmsm)
+time = np.append(time, time_1)
+time_copy = copy.copy(time)
+
+time = np.append(time, time_2)
+
+time = np.append(time, time_3)
+time = np.append(time, time_4)
+time = np.append(time, time_5)
+
+
+time_copy = np.append(time_copy, time_cmsm)
 
 # ax.plot(x, y)
 # plt.show()
