@@ -77,7 +77,7 @@ def model(duration, mu, omega, stage):  # modeling
         def f(t, arg):  # equation system
             x, v_x, y, v_y, mass, mu, alpha, omega = arg
             oR = np.sqrt(x ** 2 + y ** 2)  # расстояние от центра земли
-            oV = np.sqrt(v_x ** 2 + v_y ** 2)
+            oV = np.sqrt((v_x + OMEGA_EARTH * y) ** 2 + (v_y - OMEGA_EARTH * x) ** 2)
             if abs(0.5 * 0.85 * rho(oR - R_EARTH) * oV / 465 * (v_x + OMEGA_EARTH * y + (v_y - OMEGA_EARTH * x) * (np.cos(alpha) + np.sin(alpha)) * 0.34)) > G_MAX:
                 print('DEATH')
             return [
@@ -109,7 +109,7 @@ def model(duration, mu, omega, stage):  # modeling
         mass = w[-1, 4]
         alpha = w[-1, 6]
         print(x, '\t', v_x, '\t', y, '\t', v_y, '\t', mass, '\t', mu, '\t', alpha, '\t', omega * OMEGA_MAX,
-              np.sqrt(v_x ** 2 + v_y ** 2))
+              np.sqrt((v_x + OMEGA_EARTH * y) ** 2 + (v_y - OMEGA_EARTH * x) ** 2))
         print(np.sqrt(x ** 2 + y ** 2) - R_EARTH)
 
 
@@ -188,7 +188,7 @@ fig.subplots_adjust(left=0.07, right=0.95, top=0.95, bottom=0.5)
 
 # Создание слайдеров
 s1 = Sliders(0, 0, 300, 79.6, 0.05, 0)  # number_y, number_x, max_time, init_time, init_omega, init_mu
-s2 = Sliders(1, 0, 300, 271.6, 0, 0)
+s2 = Sliders(1, 0, 300, 189.6, 0, 0)
 s3 = Sliders(2, 0, 500, 0, 0, 1)
 s4 = Sliders(3, 0, 500, 0, 0, 0)
 s5 = Sliders(0, 1, 1000, 0, 0, 0)
